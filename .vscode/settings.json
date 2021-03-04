@@ -1,0 +1,3 @@
+{
+    "pasteImage.insertPattern": "${imageSyntaxPrefix}./images/${imageFilePath}${imageSyntaxSuffix}"
+}
