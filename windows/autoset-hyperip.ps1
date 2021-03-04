@@ -1,31 +1,34 @@
 ﻿<#The script will auto-set ip in host for Hyver-V#>
 
-$tempvar='D:\Helper\Hyper-V\ToolKit\temp.txt';
-get-vm -Name ubuntu-server-20 | Select -ExpandProperty Networkadapters | Select -Property  IPAddresses|Out-File -FilePath $tempvar;
+$tempPath='D:\Helper\Hyper-V\ToolKit\temp.txt';
+<#the name must match you vm#>
+$myVmName = ubuntu-server-20;
 
-$inet4=(Get-Content -Path $tempvar| Select-String -Pattern '{' ).ToString();
+get-vm -Name $myVmName | Select -ExpandProperty Networkadapters | Select -Property  IPAddresses|Out-File -FilePath $tempPath;
+
+$inet4=(Get-Content -Path $tempPath| Select-String -Pattern '{' ).ToString();
 <#the host name in Hyper-V#>
-$newhostname='ubuntu';
-$newvmhost=$inet4.Substring(1,$inet4. IndexOf(',') - 1) + ' '+ $newhostname;
+$newHostName='ubuntu';
+$newHost=$inet4.Substring(1,$inet4. IndexOf(',') - 1) + ' '+ $newHostName;
 
-if($newvmhost.Length -lt 12) {
+if($newHost.Length -lt 12) {
     return;
 }
 
-$hostpath='C:\Windows\System32\drivers\etc\hosts';
+$hostFilePath='C:\Windows\System32\drivers\etc\hosts';
 <# consider backup it in other place#>
-$hostbackpath='C:\Windows\System32\drivers\etc\hosts.bak';
+$hostBackupFilePath='C:\Windows\System32\drivers\etc\hosts.bak';
 
 
-$oldhosts=(Get-Content -Path $hostpath);
-$oldhosts|Out-File -FilePath $hostbackpath;
+$oldhosts=(Get-Content -Path $hostFilePath);
+$oldhosts|Out-File -FilePath $hostBackupFilePath;
 
 $rewritehosts='';
 foreach($oldhost in $oldhosts) {
-    if(!$oldhost.Contains($newhostname)) {
+    if(!$oldhost.Contains($newHostName)) {
         $rewritehosts += $oldhost + "`r`n";
     }
 }
 <#rewrite to hosts#>
-$rewritehosts + $newvmhost | Out-File -FilePath $hostpath;
+$rewritehosts + $newHost | Out-File -FilePath $hostFilePath;
 
